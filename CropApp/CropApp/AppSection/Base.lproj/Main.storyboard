@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="CropApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sps-fp-PWc">
+                                <rect key="frame" x="0.0" y="44" width="207" height="30"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Clean">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="cleanArea:" destination="BYZ-38-t0r" eventType="touchUpInside" id="HyC-PY-xJB"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YqE-bd-Yn1">
+                                <rect key="frame" x="207" y="44" width="207" height="30"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Light">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="light:" destination="BYZ-38-t0r" eventType="touchUpInside" id="c9e-Td-GlI"/>
+                                </connections>
+                            </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ros-gE-ZCQ">
+                                <rect key="frame" x="0.0" y="80" width="414" height="746"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                            </view>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2z1-As-1be">
+                                <rect key="frame" x="0.0" y="80" width="414" height="746"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="huy-8N-b8N">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="746"/>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ElZ-WR-HcK">
+                                                <rect key="frame" x="0.0" y="0.0" width="414" height="746"/>
+                                            </imageView>
+                                        </subviews>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="ElZ-WR-HcK" secondAttribute="bottom" id="9UI-iJ-i2X"/>
+                                            <constraint firstItem="ElZ-WR-HcK" firstAttribute="top" secondItem="huy-8N-b8N" secondAttribute="top" id="GRv-t3-Kud"/>
+                                            <constraint firstItem="ElZ-WR-HcK" firstAttribute="leading" secondItem="huy-8N-b8N" secondAttribute="leading" id="IYS-Gf-ctH"/>
+                                            <constraint firstAttribute="trailing" secondItem="ElZ-WR-HcK" secondAttribute="trailing" id="WAV-sm-fGt"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="huy-8N-b8N" firstAttribute="leading" secondItem="2z1-As-1be" secondAttribute="leading" id="0Ub-Uo-60z"/>
+                                    <constraint firstItem="huy-8N-b8N" firstAttribute="height" secondItem="2z1-As-1be" secondAttribute="height" id="QKc-Ke-Frk"/>
+                                    <constraint firstAttribute="bottom" secondItem="huy-8N-b8N" secondAttribute="bottom" id="SKR-ud-ElK"/>
+                                    <constraint firstItem="huy-8N-b8N" firstAttribute="width" secondItem="2z1-As-1be" secondAttribute="width" id="dWO-KR-uQZ"/>
+                                    <constraint firstItem="huy-8N-b8N" firstAttribute="top" secondItem="2z1-As-1be" secondAttribute="top" id="nbV-YL-FoN"/>
+                                    <constraint firstAttribute="trailing" secondItem="huy-8N-b8N" secondAttribute="trailing" id="yU1-Zm-6mT"/>
+                                </constraints>
+                            </scrollView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9kf-Pi-JwY">
+                                <rect key="frame" x="0.0" y="826" width="138" height="36"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="36" id="GG9-cd-2Pz"/>
+                                </constraints>
+                                <state key="normal" title="Gallery">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="takePhotoFromGallery:" destination="BYZ-38-t0r" eventType="touchUpInside" id="p4S-dt-Xo2"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ud5-Ca-83v">
+                                <rect key="frame" x="138" y="826" width="138" height="36"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Crop Image">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="cropImage:" destination="BYZ-38-t0r" eventType="touchUpInside" id="EMK-TK-ALD"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4An-GS-gm2">
+                                <rect key="frame" x="276" y="826" width="138" height="36"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Save photo">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="savePhoto:" destination="BYZ-38-t0r" eventType="touchUpInside" id="UTG-1g-KSe"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aRA-3N-dsc">
+                                <rect key="frame" x="171" y="718" width="72" height="72"/>
+                                <color key="backgroundColor" systemColor="systemRedColor" red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="72" id="Ezt-mL-Tlu"/>
+                                    <constraint firstAttribute="height" constant="72" id="guG-f2-Aqq"/>
+                                </constraints>
+                                <state key="normal">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <color key="titleShadowColor" systemColor="separatorColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="36"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="takePhotoFromCamera:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Zpf-rM-rSu"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="2z1-As-1be" firstAttribute="bottom" secondItem="Ros-gE-ZCQ" secondAttribute="bottom" id="0Bv-Ho-RID"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Ud5-Ca-83v" secondAttribute="bottom" id="3x8-VK-aUX"/>
+                            <constraint firstItem="YqE-bd-Yn1" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="9su-33-myS"/>
+                            <constraint firstItem="4An-GS-gm2" firstAttribute="height" secondItem="9kf-Pi-JwY" secondAttribute="height" id="BYf-7n-wHN"/>
+                            <constraint firstItem="Ros-gE-ZCQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="EJ9-n8-wgQ"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="2z1-As-1be" secondAttribute="trailing" id="IIq-Qc-KYa"/>
+                            <constraint firstItem="Ud5-Ca-83v" firstAttribute="leading" secondItem="9kf-Pi-JwY" secondAttribute="trailing" id="JNL-b5-slU"/>
+                            <constraint firstItem="sps-fp-PWc" firstAttribute="width" secondItem="YqE-bd-Yn1" secondAttribute="width" id="Q5L-Fx-r6q"/>
+                            <constraint firstItem="aRA-3N-dsc" firstAttribute="centerX" secondItem="Ud5-Ca-83v" secondAttribute="centerX" id="TB1-ej-egm"/>
+                            <constraint firstItem="4An-GS-gm2" firstAttribute="width" secondItem="9kf-Pi-JwY" secondAttribute="width" id="TMF-7S-ZWO"/>
+                            <constraint firstItem="4An-GS-gm2" firstAttribute="leading" secondItem="Ud5-Ca-83v" secondAttribute="trailing" id="TUj-UG-paR"/>
+                            <constraint firstItem="Ud5-Ca-83v" firstAttribute="width" secondItem="9kf-Pi-JwY" secondAttribute="width" id="UFE-UE-gEy"/>
+                            <constraint firstItem="YqE-bd-Yn1" firstAttribute="leading" secondItem="sps-fp-PWc" secondAttribute="trailing" id="W2e-Oz-Spy"/>
+                            <constraint firstItem="2z1-As-1be" firstAttribute="top" secondItem="Ros-gE-ZCQ" secondAttribute="top" id="aEb-80-c67"/>
+                            <constraint firstItem="2z1-As-1be" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="bNS-75-bU8"/>
+                            <constraint firstItem="sps-fp-PWc" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="dwi-l3-MZj"/>
+                            <constraint firstItem="Ud5-Ca-83v" firstAttribute="height" secondItem="9kf-Pi-JwY" secondAttribute="height" id="dy0-0K-Tir"/>
+                            <constraint firstItem="9kf-Pi-JwY" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="gI2-Jh-xaO"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="4An-GS-gm2" secondAttribute="trailing" id="go8-lh-YKd"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="9kf-Pi-JwY" secondAttribute="bottom" id="hf4-Xw-Y9k"/>
+                            <constraint firstItem="Ud5-Ca-83v" firstAttribute="top" secondItem="aRA-3N-dsc" secondAttribute="bottom" constant="36" id="naO-ea-QWj"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="YqE-bd-Yn1" secondAttribute="trailing" id="pi4-ne-LY3"/>
+                            <constraint firstItem="Ros-gE-ZCQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="36" id="pjX-J4-0Lx"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="4An-GS-gm2" secondAttribute="bottom" id="uDw-R6-qJA"/>
+                            <constraint firstItem="sps-fp-PWc" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="wC0-U8-irp"/>
+                            <constraint firstItem="Ud5-Ca-83v" firstAttribute="top" secondItem="Ros-gE-ZCQ" secondAttribute="bottom" id="xUt-tq-umc"/>
+                            <constraint firstItem="Ros-gE-ZCQ" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="zwO-Y8-jjb"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                    </view>
+                    <connections>
+                        <outlet property="imageView" destination="ElZ-WR-HcK" id="1Qj-x2-E4o"/>
+                        <outlet property="previewView" destination="Ros-gE-ZCQ" id="yLf-Dp-0zE"/>
+                        <outlet property="scrollView" destination="2z1-As-1be" id="cUk-nq-1sc"/>
+                        <outlet property="takePhotoButton" destination="aRA-3N-dsc" id="izV-wX-GRb"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="137.68115942028987" y="115.84821428571428"/>
+        </scene>
+    </scenes>
+</document>
