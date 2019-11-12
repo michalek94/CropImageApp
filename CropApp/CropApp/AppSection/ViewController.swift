@@ -23,6 +23,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var takePhotoButton: UIButton!
     
+    let borderLayer = CAShapeLayer()
     let imagePicker = UIImagePickerController()
     var circlePath = UIBezierPath()
     
@@ -35,6 +36,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             let height = circlePath.bounds.size.height
             return CGRect(x: x, y: y, width: width, height: height)
         }
+        set {}
     }
     
     var captureSession: AVCaptureSession!
@@ -129,10 +131,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             DispatchQueue.main.async { [weak self] in
                 self?.imageView.image = croppedCGImage
             }
-            
+        
             self.scrollView.zoomScale = 1.0
-            
-            let _ = self.view.layer.sublayers?.popLast()
         } else {
             print("You need to take photo first!!")
         }
@@ -155,8 +155,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
                    width: size,
                    height: size,
                    cornerRadius: 0)
-        
-        
     }
     
     @IBAction func savePhoto(_ sender: UIButton) {
@@ -174,7 +172,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.takePhotoButton.isHidden = false
         self.scrollView.isUserInteractionEnabled = false
         
-        let _ = self.view.layer.sublayers?.popLast()
+        self.view.layer.sublayers?.removeAll(where: { layer -> Bool in
+            return layer == borderLayer
+        })
     }
     
     @IBAction func light(_ sender: UIButton) {
@@ -275,11 +275,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         path.append(self.circlePath)
         path.usesEvenOddFillRule = true
         
-        let borderLayer = CAShapeLayer()
-        borderLayer.path = circlePath.cgPath
-        borderLayer.lineWidth = 2
-        borderLayer.strokeColor = UIColor.red.cgColor
-        borderLayer.fillColor = UIColor.clear.cgColor
+        self.borderLayer.path = circlePath.cgPath
+        self.borderLayer.lineWidth = 2
+        self.borderLayer.strokeColor = UIColor.red.cgColor
+        self.borderLayer.fillColor = UIColor.clear.cgColor
         
         view.layer.addSublayer(borderLayer)
     }
@@ -294,6 +293,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         let x = -rect.origin.x - imageView.imageFrame().origin.x
         
         context.translateBy(x: x, y: y)
+        
+        self.view.layer.sublayers?.removeAll(where: { layer -> Bool in
+            return layer == borderLayer
+        })
         
         self.view.layer.render(in: context)
         
