@@ -51,6 +51,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.imageView.clipsToBounds = true
         
         self.imagePicker.delegate = self
+        self.scrollView.isUserInteractionEnabled = false
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -62,6 +63,55 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         super.viewWillDisappear(animated)
         self.captureSession.stopRunning()
         self.toggleTorch(on: false)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        
+        let screenSize = self.previewView.bounds.size
+        if let touchPoint = touches.first {
+            let x = touchPoint.location(in: self.previewView).y / screenSize.height
+            let y = 1.0 - touchPoint.location(in: self.previewView).x / screenSize.width
+            let focusPoint = CGPoint(x: x, y: y)
+            let focusViewPoint = CGPoint(x: touchPoint.location(in: self.previewView).x - 25.0, y: touchPoint.location(in: self.previewView).y - 25.0)
+            
+            print(focusPoint)
+            print(focusViewPoint)
+            
+            let viewTouch = UIView(frame: CGRect(origin: focusViewPoint, size: CGSize(width: 75.0, height: 75.0)))
+            viewTouch.layer.cornerRadius = viewTouch.frame.height/2
+            viewTouch.layer.borderWidth = 2.0
+            viewTouch.layer.borderColor = UIColor.white.cgColor
+            viewTouch.backgroundColor = .clear
+            
+            self.imageView.addSubview(viewTouch)
+            
+            self.view.setNeedsLayout()
+            self.view.layoutIfNeeded()
+            
+            if let device = captureDevice {
+                do {
+                    try device.lockForConfiguration()
+                    
+                    device.focusPointOfInterest = focusPoint
+                    device.focusMode = .autoFocus
+                    device.exposurePointOfInterest = focusPoint
+                    device.exposureMode = .continuousAutoExposure
+                    device.unlockForConfiguration()
+                }
+                catch {}
+            }
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        
+        if let _ = touches.first {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                self?.imageView.subviews.first?.removeFromSuperview()
+            }
+        }
     }
     
     @IBAction func takePhotoFromGallery(_ sender: UIButton) {
@@ -90,6 +140,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
         self.stillImageOutput.capturePhoto(with: settings, delegate: self)
         
+        self.scrollView.isUserInteractionEnabled = true
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             self?.takePhotoButton.isHidden = true
             self?.previewView.isHidden = true
@@ -101,6 +153,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
                    width: size,
                    height: size,
                    cornerRadius: 0)
+        
+        
     }
     
     @IBAction func savePhoto(_ sender: UIButton) {
@@ -116,6 +170,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.imageView.image = nil
         self.previewView.isHidden = false
         self.takePhotoButton.isHidden = false
+        
+        let _ = self.view.layer.sublayers?.popLast()
     }
     
     @IBAction func light(_ sender: UIButton) {
@@ -212,7 +268,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         var topSafeArea: CGFloat
         var bottomSafeArea: CGFloat
         let buttonsAreaHeight: CGFloat = 36.0
-
+        
         if #available(iOS 11.0, *) {
             topSafeArea = view.safeAreaInsets.top
             bottomSafeArea = view.safeAreaInsets.bottom
@@ -220,7 +276,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         } else {
             path = UIBezierPath(roundedRect: CGRect(x: 0, y: buttonsAreaHeight, width: self.view.bounds.size.width, height: self.view.bounds.size.height - 2*buttonsAreaHeight), cornerRadius: 0) // not tested, have no devices without safe area :(
         }
-
+        
         self.circlePath = UIBezierPath(roundedRect: CGRect(x: x, y: y, width: width, height: height), cornerRadius: cornerRadius)
         
         path.append(self.circlePath)
@@ -278,6 +334,7 @@ extension ViewController: UIImagePickerControllerDelegate {
             self?.imageView.image = selectedImage
             self?.previewView.isHidden = true
             self?.takePhotoButton.isHidden = true
+            self?.scrollView.isUserInteractionEnabled = true
             
             let size: CGFloat = 200
             self?.layer(x: ((self?.view.frame.size.width ?? 0) / 2) - (size / 2),
