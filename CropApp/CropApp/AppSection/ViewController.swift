@@ -268,31 +268,20 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     private func layer(x: CGFloat,y: CGFloat, width: CGFloat, height: CGFloat, cornerRadius: CGFloat) {
-        var path: UIBezierPath
-        var topSafeArea: CGFloat
-        var bottomSafeArea: CGFloat
-        let buttonsAreaHeight: CGFloat = 36.0
-        
-        if #available(iOS 11.0, *) {
-            topSafeArea = view.safeAreaInsets.top
-            bottomSafeArea = view.safeAreaInsets.bottom
-            path = UIBezierPath(roundedRect: CGRect(x: 0, y: topSafeArea + buttonsAreaHeight, width: self.view.bounds.size.width, height: self.view.bounds.size.height - buttonsAreaHeight - topSafeArea - 2 * bottomSafeArea), cornerRadius: 0)
-        } else {
-            path = UIBezierPath(roundedRect: CGRect(x: 0, y: buttonsAreaHeight, width: self.view.bounds.size.width, height: self.view.bounds.size.height - 2*buttonsAreaHeight), cornerRadius: 0) // not tested, have no devices without safe area :(
-        }
+        let path: UIBezierPath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height), cornerRadius: 0)
         
         self.circlePath = UIBezierPath(roundedRect: CGRect(x: x, y: y, width: width, height: height), cornerRadius: cornerRadius)
         
         path.append(self.circlePath)
         path.usesEvenOddFillRule = true
         
-        let fillLayer = CAShapeLayer()
-        fillLayer.path = path.cgPath
-        fillLayer.fillRule = CAShapeLayerFillRule.evenOdd
-        fillLayer.opacity = 0.7
-        fillLayer.fillColor = UIColor.lightGray.cgColor
+        let borderLayer = CAShapeLayer()
+        borderLayer.path = circlePath.cgPath
+        borderLayer.lineWidth = 2
+        borderLayer.strokeColor = UIColor.red.cgColor
+        borderLayer.fillColor = UIColor.clear.cgColor
         
-        view.layer.addSublayer(fillLayer)
+        view.layer.addSublayer(borderLayer)
     }
     
     private func cropImage(image: UIImage, rect: CGRect, scale: CGFloat) -> UIImage? {
