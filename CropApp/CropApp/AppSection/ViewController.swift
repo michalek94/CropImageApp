@@ -52,6 +52,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         
         self.imagePicker.delegate = self
         self.scrollView.isUserInteractionEnabled = false
+        
+        self.takePhotoButton.layer.cornerRadius = takePhotoButton.frame.height/2
+        self.takePhotoButton.layer.borderWidth = 2.0
+        self.takePhotoButton.layer.borderColor = UIColor.white.cgColor
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -73,12 +77,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             let x = touchPoint.location(in: self.previewView).y / screenSize.height
             let y = 1.0 - touchPoint.location(in: self.previewView).x / screenSize.width
             let focusPoint = CGPoint(x: x, y: y)
-            let focusViewPoint = CGPoint(x: touchPoint.location(in: self.previewView).x - 25.0, y: touchPoint.location(in: self.previewView).y - 25.0)
+            let viewTouchSize = CGSize(width: 72.0, height: 72.0)
+            let focusViewPoint = CGPoint(x: touchPoint.location(in: self.previewView).x - viewTouchSize.width/2, y: touchPoint.location(in: self.previewView).y - viewTouchSize.height/2)
+            let viewTouch = UIView(frame: CGRect(origin: focusViewPoint, size: CGSize(width: viewTouchSize.width, height: viewTouchSize.height)))
             
-            print(focusPoint)
-            print(focusViewPoint)
-            
-            let viewTouch = UIView(frame: CGRect(origin: focusViewPoint, size: CGSize(width: 75.0, height: 75.0)))
             viewTouch.layer.cornerRadius = viewTouch.frame.height/2
             viewTouch.layer.borderWidth = 2.0
             viewTouch.layer.borderColor = UIColor.white.cgColor
@@ -108,7 +110,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         super.touchesEnded(touches, with: event)
         
         if let _ = touches.first {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
                 self?.imageView.subviews.first?.removeFromSuperview()
             }
         }
@@ -170,6 +172,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.imageView.image = nil
         self.previewView.isHidden = false
         self.takePhotoButton.isHidden = false
+        self.scrollView.isUserInteractionEnabled = false
         
         let _ = self.view.layer.sublayers?.popLast()
     }
@@ -219,7 +222,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             self.previewView.isHidden = false
             self.takePhotoButton.isHidden = false
         }))
-        
+          
+        self.scrollView.isUserInteractionEnabled = false
         self.present(savingPhotoAlert, animated: true)
     }
     
