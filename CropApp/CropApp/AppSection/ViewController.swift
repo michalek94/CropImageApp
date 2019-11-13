@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController, UINavigationControllerDelegate {
+class ViewController: UIViewController, UINavigationControllerDelegate, UIGestureRecognizerDelegate {
     
     @IBOutlet weak var scrollView: UIScrollView! {
         didSet {
@@ -58,6 +58,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.takePhotoButton.layer.cornerRadius = takePhotoButton.frame.height/2
         self.takePhotoButton.layer.borderWidth = 2.0
         self.takePhotoButton.layer.borderColor = UIColor.white.cgColor
+        
+        let pinchRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(pinchToZoom(_:)))
+        self.previewView.addGestureRecognizer(pinchRecognizer)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -73,32 +76,32 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        
+
         let screenSize = self.previewView.bounds.size
         if let touchPoint = touches.first {
             let x = touchPoint.location(in: self.previewView).y / screenSize.height
             let y = 1.0 - touchPoint.location(in: self.previewView).x / screenSize.width
             let focusPoint = CGPoint(x: x, y: y)
-            
+
             if let device = captureDevice {
                 do {
                     try device.lockForConfiguration()
-                    
+
                     if device.isFocusPointOfInterestSupported {
                         let viewTouchSize = CGSize(width: 72.0, height: 72.0)
                         let focusViewPoint = CGPoint(x: touchPoint.location(in: self.previewView).x - viewTouchSize.width/2, y: touchPoint.location(in: self.previewView).y - viewTouchSize.height/2)
                         let viewTouch = UIView(frame: CGRect(origin: focusViewPoint, size: CGSize(width: viewTouchSize.width, height: viewTouchSize.height)))
-                        
+
                         viewTouch.layer.cornerRadius = viewTouch.frame.height/2
                         viewTouch.layer.borderWidth = 2.0
                         viewTouch.layer.borderColor = UIColor.white.cgColor
                         viewTouch.backgroundColor = .clear
-                        
+
                         self.imageView.addSubview(viewTouch)
-                        
+
                         self.view.setNeedsLayout()
                         self.view.layoutIfNeeded()
-                        
+
                         device.focusPointOfInterest = focusPoint
                         device.focusMode = .autoFocus
                         device.exposurePointOfInterest = focusPoint
@@ -110,10 +113,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             }
         }
     }
-    
+
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        
+
         if let _ = touches.first {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
                 self?.imageView.subviews.first?.removeFromSuperview()
@@ -207,7 +210,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             
             do {
                 try session.addInput(AVCaptureDeviceInput(device: newCamera))
-                
             } catch {
                 print("error: \(error.localizedDescription)")
             }
@@ -216,27 +218,32 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         }
     }
     
-    private func toggleTorch(on: Bool = false) {
-        guard let device = captureDevice else { return }
-        
-        if device.hasTorch {
+    @objc func pinchToZoom(_ sender: UIPinchGestureRecognizer) {
+        guard let device = self.captureDevice else { return }
+
+        if sender.state == .changed {
+            let maxZoomFactor = device.activeFormat.videoMaxZoomFactor
+            let pinchVelocityDividerFactor: CGFloat = 5.0
+
             do {
+
                 try device.lockForConfiguration()
-                
-                if on {
-                    device.torchMode = .on
-                } else {
-                    device.torchMode = .off
-                }
-                
-                device.unlockForConfiguration()
-            } catch {
-                print("Torch could not be used!")
+                defer { device.unlockForConfiguration() }
+
+                let desiredZoomFactor = device.videoZoomFactor + atan2(sender.velocity, pinchVelocityDividerFactor)
+                device.videoZoomFactor = max(1.0, min(desiredZoomFactor, maxZoomFactor))
+
+            } catch let error  {
+                print("An error has occurred: \(error.localizedDescription)")
             }
-        } else {
-            print("Torch is not available!")
         }
     }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    // MARK: some setup functions
     
     private func savePhotoToAlbum(image: UIImage) {
         let savingPhotoAlert = UIAlertController(title: "Save photo", message: "Do you want to save photo to photo album?", preferredStyle: .alert)
@@ -256,46 +263,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         
         self.scrollView.isUserInteractionEnabled = false
         self.present(savingPhotoAlert, animated: true)
-    }
-    
-    private func prepareCamera() {
-        self.captureSession = AVCaptureSession()
-        self.captureSession.sessionPreset = .photo
-        
-        self.captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
-        
-        do {
-            let input = try AVCaptureDeviceInput(device: captureDevice)
-            self.stillImageOutput = AVCapturePhotoOutput()
-            
-            if self.captureSession.canAddInput(input) && self.captureSession.canAddOutput(self.stillImageOutput) {
-                self.captureSession.addInput(input)
-                self.captureSession.addOutput(self.stillImageOutput)
-                self.setupLivePreview()
-            }
-        } catch let error  {
-            print("Error Unable to initialize back camera:  \(error.localizedDescription)")
-        }
-    }
-    
-    private func setupLivePreview() {
-        self.videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        self.videoPreviewLayer.videoGravity = .resizeAspectFill
-        self.videoPreviewLayer.connection?.videoOrientation = .portrait
-        
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            self.captureSession.startRunning()
-            
-            DispatchQueue.main.async {
-                let bounds: CGRect = self.previewView.layer.bounds
-                
-                self.videoPreviewLayer.bounds = bounds
-                self.videoPreviewLayer.position = CGPoint(x: bounds.midX, y: bounds.midY)
-                
-                self.previewView.layer.addSublayer(self.videoPreviewLayer)
-            }
-        }
     }
     
     private func layer(x: CGFloat,y: CGFloat, width: CGFloat, height: CGFloat, cornerRadius: CGFloat) {
@@ -340,6 +307,77 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         return croppedImage
     }
     
+    private func prepareCamera() {
+        self.captureSession = AVCaptureSession()
+        self.captureSession.sessionPreset = .photo
+        
+        self.captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
+        
+        self.configureCameraForHighestFrameRate(device: self.captureDevice)
+        
+        do {
+            let input = try AVCaptureDeviceInput(device: captureDevice)
+            self.stillImageOutput = AVCapturePhotoOutput()
+            
+            if self.captureSession.canAddInput(input) && self.captureSession.canAddOutput(self.stillImageOutput) {
+                self.captureSession.addInput(input)
+                self.captureSession.addOutput(self.stillImageOutput)
+                self.setupLivePreview()
+            }
+        } catch let error  {
+            print("Error Unable to initialize back camera: \(error.localizedDescription)")
+        }
+    }
+    
+    private func setupLivePreview() {
+        self.videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        self.videoPreviewLayer.videoGravity = .resizeAspectFill
+        self.videoPreviewLayer.connection?.videoOrientation = .portrait
+        
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            self.captureSession.startRunning()
+            
+            DispatchQueue.main.async {
+                let bounds: CGRect = self.previewView.layer.bounds
+                
+                self.videoPreviewLayer.bounds = bounds
+                self.videoPreviewLayer.position = CGPoint(x: bounds.midX, y: bounds.midY)
+                
+                self.previewView.layer.addSublayer(self.videoPreviewLayer)
+            }
+        }
+    }
+    
+    private func configureCameraForHighestFrameRate(device: AVCaptureDevice) {
+        var bestFormat: AVCaptureDevice.Format?
+        var bestFrameRateRange: AVFrameRateRange?
+        
+        for format in device.formats {
+            for range in format.videoSupportedFrameRateRanges {
+                if range.maxFrameRate > bestFrameRateRange?.maxFrameRate ?? 0 {
+                    bestFormat = format
+                    bestFrameRateRange = range
+                }
+            }
+        }
+        
+        if let bestFormat = bestFormat, let bestFrameRateRange = bestFrameRateRange {
+            do {
+                try device.lockForConfiguration()
+                
+                device.activeFormat = bestFormat
+                
+                let duration = bestFrameRateRange.minFrameDuration
+                device.activeVideoMinFrameDuration = duration
+                device.activeVideoMaxFrameDuration = duration
+                
+                device.unlockForConfiguration()
+            } catch let error  {
+                print("An error has occurred:  \(error.localizedDescription)")
+            }
+        }
+    }
     
     private func cameraWithPosition(_ position: AVCaptureDevice.Position) -> AVCaptureDevice? {
         let deviceDescoverySession = AVCaptureDevice.DiscoverySession.init(deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera], mediaType: AVMediaType.video, position: AVCaptureDevice.Position.unspecified)
@@ -351,6 +389,28 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         }
         
         return nil
+    }
+    
+    private func toggleTorch(on: Bool = false) {
+        guard let device = captureDevice else { return }
+        
+        if device.hasTorch {
+            do {
+                try device.lockForConfiguration()
+                
+                if on {
+                    device.torchMode = .on
+                } else {
+                    device.torchMode = .off
+                }
+                
+                device.unlockForConfiguration()
+            } catch {
+                print("Torch could not be used!")
+            }
+        } else {
+            print("Torch is not available!")
+        }
     }
     
 }
