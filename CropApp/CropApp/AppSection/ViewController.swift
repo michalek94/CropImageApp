@@ -22,6 +22,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var takePhotoButton: UIButton!
+    @IBOutlet weak var zoomLabel: UILabel!
     
     let borderLayer = CAShapeLayer()
     let imagePicker = UIImagePickerController()
@@ -247,6 +248,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
                 let zoom = max(1.0, min(desiredZoomFactor, maxZoomFactor))
                 
                 if zoom <= 10.0 {
+                    self.zoomLabel.text = String(format: "%.1fx", zoom).replacingOccurrences(of: ".", with: ",")
                     device.videoZoomFactor = zoom
                 }
             } catch let error  {
@@ -268,6 +270,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             try device.lockForConfiguration()
             defer { device.unlockForConfiguration() }
             
+            self.zoomLabel.text = "1,0x"
             device.videoZoomFactor = 1.0
         } catch let error  {
             print("An error has occurred: \(error.localizedDescription)")

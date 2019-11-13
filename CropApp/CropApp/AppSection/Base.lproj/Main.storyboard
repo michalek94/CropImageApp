@@ -92,6 +92,15 @@
                                     <constraint firstAttribute="trailing" secondItem="huy-8N-b8N" secondAttribute="trailing" id="yU1-Zm-6mT"/>
                                 </constraints>
                             </scrollView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1,0x" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qbh-xK-e8E">
+                                <rect key="frame" x="192" y="736" width="30" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="nZZ-X5-ZiW"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kDh-Sy-8p5">
                                 <rect key="frame" x="0.0" y="772" width="414" height="90"/>
                                 <subviews>
@@ -156,6 +165,7 @@
                             <constraint firstItem="2z1-As-1be" firstAttribute="bottom" secondItem="Ros-gE-ZCQ" secondAttribute="bottom" id="0Bv-Ho-RID"/>
                             <constraint firstItem="Ros-gE-ZCQ" firstAttribute="top" secondItem="YqE-bd-Yn1" secondAttribute="bottom" id="2Wp-cg-8aM"/>
                             <constraint firstItem="4An-GS-gm2" firstAttribute="height" secondItem="sps-fp-PWc" secondAttribute="height" id="4q5-hf-jZQ"/>
+                            <constraint firstItem="qbh-xK-e8E" firstAttribute="centerX" secondItem="kDh-Sy-8p5" secondAttribute="centerX" id="5KU-0p-c0D"/>
                             <constraint firstItem="sps-fp-PWc" firstAttribute="width" secondItem="YqE-bd-Yn1" secondAttribute="width" id="6Uh-c2-q0Q"/>
                             <constraint firstItem="4An-GS-gm2" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="743-Ub-FjD"/>
                             <constraint firstItem="Ros-gE-ZCQ" firstAttribute="top" secondItem="Ud5-Ca-83v" secondAttribute="bottom" id="8xl-SU-t4G"/>
@@ -171,6 +181,7 @@
                             <constraint firstItem="YqE-bd-Yn1" firstAttribute="leading" secondItem="4An-GS-gm2" secondAttribute="trailing" id="QL0-xX-td1"/>
                             <constraint firstItem="Ros-gE-ZCQ" firstAttribute="top" secondItem="4An-GS-gm2" secondAttribute="bottom" id="VLY-t5-KH4"/>
                             <constraint firstItem="4An-GS-gm2" firstAttribute="width" secondItem="sps-fp-PWc" secondAttribute="width" id="WL8-0f-VSI"/>
+                            <constraint firstItem="kDh-Sy-8p5" firstAttribute="top" secondItem="qbh-xK-e8E" secondAttribute="bottom" constant="15" id="X7N-wh-YDX"/>
                             <constraint firstItem="sps-fp-PWc" firstAttribute="height" secondItem="Ud5-Ca-83v" secondAttribute="height" id="a9A-Gy-lxa"/>
                             <constraint firstItem="2z1-As-1be" firstAttribute="top" secondItem="Ros-gE-ZCQ" secondAttribute="top" id="aEb-80-c67"/>
                             <constraint firstItem="2z1-As-1be" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="bNS-75-bU8"/>
@@ -189,6 +200,7 @@
                         <outlet property="previewView" destination="Ros-gE-ZCQ" id="yLf-Dp-0zE"/>
                         <outlet property="scrollView" destination="2z1-As-1be" id="cUk-nq-1sc"/>
                         <outlet property="takePhotoButton" destination="aRA-3N-dsc" id="izV-wX-GRb"/>
+                        <outlet property="zoomLabel" destination="qbh-xK-e8E" id="l9P-bI-ug3"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
