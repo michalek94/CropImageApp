@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController, UINavigationControllerDelegate, UIGestureRecognizerDelegate {
+class ViewController: UIViewController, UINavigationControllerDelegate {
     
     @IBOutlet weak var scrollView: UIScrollView! {
         didSet {
@@ -72,36 +72,37 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIGestur
         super.viewWillDisappear(animated)
         self.captureSession.stopRunning()
         self.toggleTorch(on: false)
+        self.resetZoom()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-
+        
         let screenSize = self.previewView.bounds.size
-        if let touchPoint = touches.first {
+        if event?.allTouches?.count == 1, let touchPoint = touches.first {
             let x = touchPoint.location(in: self.previewView).y / screenSize.height
             let y = 1.0 - touchPoint.location(in: self.previewView).x / screenSize.width
             let focusPoint = CGPoint(x: x, y: y)
-
+            
             if let device = captureDevice {
                 do {
                     try device.lockForConfiguration()
-
+                    
                     if device.isFocusPointOfInterestSupported {
                         let viewTouchSize = CGSize(width: 72.0, height: 72.0)
                         let focusViewPoint = CGPoint(x: touchPoint.location(in: self.previewView).x - viewTouchSize.width/2, y: touchPoint.location(in: self.previewView).y - viewTouchSize.height/2)
                         let viewTouch = UIView(frame: CGRect(origin: focusViewPoint, size: CGSize(width: viewTouchSize.width, height: viewTouchSize.height)))
-
+                        
                         viewTouch.layer.cornerRadius = viewTouch.frame.height/2
                         viewTouch.layer.borderWidth = 2.0
                         viewTouch.layer.borderColor = UIColor.white.cgColor
                         viewTouch.backgroundColor = .clear
-
+                        
                         self.imageView.addSubview(viewTouch)
-
+                        
                         self.view.setNeedsLayout()
                         self.view.layoutIfNeeded()
-
+                        
                         device.focusPointOfInterest = focusPoint
                         device.focusMode = .autoFocus
                         device.exposurePointOfInterest = focusPoint
@@ -113,13 +114,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIGestur
             }
         }
     }
-
+    
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-
+        
         if let _ = touches.first {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
-                self?.imageView.subviews.first?.removeFromSuperview()
+                for subView in self?.imageView.subviews ?? [] {
+                    subView.removeFromSuperview()
+                }
             }
         }
     }
@@ -148,6 +151,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIGestur
         let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
         self.stillImageOutput.capturePhoto(with: settings, delegate: self)
         
+        self.resetZoom()
         self.scrollView.isUserInteractionEnabled = true
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
@@ -171,6 +175,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIGestur
     }
     
     @IBAction func cleanArea(_ sender: UIButton) {
+        self.resetZoom()
         self.scrollView.zoomScale = 1.0
         self.imageView.image = nil
         self.previewView.isHidden = false
@@ -187,6 +192,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIGestur
     
     @IBAction func switchCamera(_ sender: UIButton) {
         if let session = captureSession {
+            self.resetZoom()
+            
             let currentCameraInput: AVCaptureInput = session.inputs[0]
             var newCamera: AVCaptureDevice
             newCamera = AVCaptureDevice.default(for: AVMediaType.video)!
@@ -220,27 +227,51 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIGestur
     
     @objc func pinchToZoom(_ sender: UIPinchGestureRecognizer) {
         guard let device = self.captureDevice else { return }
-
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+            for subView in self?.imageView.subviews ?? [] {
+                subView.removeFromSuperview()
+            }
+        }
+        
         if sender.state == .changed {
             let maxZoomFactor = device.activeFormat.videoMaxZoomFactor
             let pinchVelocityDividerFactor: CGFloat = 5.0
-
+            
             do {
-
                 try device.lockForConfiguration()
                 defer { device.unlockForConfiguration() }
-
+                
                 let desiredZoomFactor = device.videoZoomFactor + atan2(sender.velocity, pinchVelocityDividerFactor)
-                device.videoZoomFactor = max(1.0, min(desiredZoomFactor, maxZoomFactor))
-
+                
+                let zoom = max(1.0, min(desiredZoomFactor, maxZoomFactor))
+                
+                if zoom <= 10.0 {
+                    device.videoZoomFactor = zoom
+                }
             } catch let error  {
                 print("An error has occurred: \(error.localizedDescription)")
             }
         }
     }
     
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
+    func resetZoom() {
+        guard let device = self.captureDevice else { return }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+            for subView in self?.imageView.subviews ?? [] {
+                subView.removeFromSuperview()
+            }
+        }
+        
+        do {
+            try device.lockForConfiguration()
+            defer { device.unlockForConfiguration() }
+            
+            device.videoZoomFactor = 1.0
+        } catch let error  {
+            print("An error has occurred: \(error.localizedDescription)")
+        }
     }
     
     // MARK: some setup functions
@@ -292,8 +323,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIGestur
         
         context.translateBy(x: x, y: y)
         
-        self.view.layer.sublayers?.removeAll(where: { layer -> Bool in
-            return layer == borderLayer
+        self.view.layer.sublayers?.removeAll(where: { [weak self] layer -> Bool in
+            return layer == self?.borderLayer
         })
         
         self.view.layer.render(in: context)
