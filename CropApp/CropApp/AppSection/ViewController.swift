@@ -79,29 +79,32 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             let x = touchPoint.location(in: self.previewView).y / screenSize.height
             let y = 1.0 - touchPoint.location(in: self.previewView).x / screenSize.width
             let focusPoint = CGPoint(x: x, y: y)
-            let viewTouchSize = CGSize(width: 72.0, height: 72.0)
-            let focusViewPoint = CGPoint(x: touchPoint.location(in: self.previewView).x - viewTouchSize.width/2, y: touchPoint.location(in: self.previewView).y - viewTouchSize.height/2)
-            let viewTouch = UIView(frame: CGRect(origin: focusViewPoint, size: CGSize(width: viewTouchSize.width, height: viewTouchSize.height)))
-            
-            viewTouch.layer.cornerRadius = viewTouch.frame.height/2
-            viewTouch.layer.borderWidth = 2.0
-            viewTouch.layer.borderColor = UIColor.white.cgColor
-            viewTouch.backgroundColor = .clear
-            
-            self.imageView.addSubview(viewTouch)
-            
-            self.view.setNeedsLayout()
-            self.view.layoutIfNeeded()
             
             if let device = captureDevice {
                 do {
                     try device.lockForConfiguration()
                     
-                    device.focusPointOfInterest = focusPoint
-                    device.focusMode = .autoFocus
-                    device.exposurePointOfInterest = focusPoint
-                    device.exposureMode = .continuousAutoExposure
-                    device.unlockForConfiguration()
+                    if device.isFocusPointOfInterestSupported {
+                        let viewTouchSize = CGSize(width: 72.0, height: 72.0)
+                        let focusViewPoint = CGPoint(x: touchPoint.location(in: self.previewView).x - viewTouchSize.width/2, y: touchPoint.location(in: self.previewView).y - viewTouchSize.height/2)
+                        let viewTouch = UIView(frame: CGRect(origin: focusViewPoint, size: CGSize(width: viewTouchSize.width, height: viewTouchSize.height)))
+                       
+                        viewTouch.layer.cornerRadius = viewTouch.frame.height/2
+                        viewTouch.layer.borderWidth = 2.0
+                        viewTouch.layer.borderColor = UIColor.white.cgColor
+                        viewTouch.backgroundColor = .clear
+                        
+                        self.imageView.addSubview(viewTouch)
+                        
+                        self.view.setNeedsLayout()
+                        self.view.layoutIfNeeded()
+                        
+                        device.focusPointOfInterest = focusPoint
+                        device.focusMode = .autoFocus
+                        device.exposurePointOfInterest = focusPoint
+                        device.exposureMode = .continuousAutoExposure
+                        device.unlockForConfiguration()
+                    }
                 }
                 catch {}
             }
@@ -131,7 +134,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             DispatchQueue.main.async { [weak self] in
                 self?.imageView.image = croppedCGImage
             }
-        
+            
             self.scrollView.zoomScale = 1.0
         } else {
             print("You need to take photo first!!")
@@ -172,13 +175,39 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.takePhotoButton.isHidden = false
         self.scrollView.isUserInteractionEnabled = false
         
-        self.view.layer.sublayers?.removeAll(where: { layer -> Bool in
-            return layer == borderLayer
+        self.view.layer.sublayers?.removeAll(where: { [weak self] layer -> Bool in
+            return layer == self?.borderLayer
         })
     }
     
     @IBAction func light(_ sender: UIButton) {
         self.toggleTorch(on: self.captureDevice.torchMode == .off)
+    }
+    
+    @IBAction func switchCamera(_ sender: UIButton) {
+        if let session = captureSession {
+            let currentCameraInput: AVCaptureInput = session.inputs[0]
+            session.removeInput(currentCameraInput)
+            var newCamera: AVCaptureDevice
+            newCamera = AVCaptureDevice.default(for: AVMediaType.video)!
+            
+            if (currentCameraInput as! AVCaptureDeviceInput).device.position == .back {
+                UIView.transition(with: self.previewView, duration: 0.5, options: .transitionFlipFromLeft, animations: { [weak self] in
+                    guard let self = self else { return }
+                    newCamera = self.cameraWithPosition(.front)!
+                })
+            } else {
+                UIView.transition(with: self.previewView, duration: 0.5, options: .transitionFlipFromRight, animations: { [weak self] in
+                    guard let self = self else { return }
+                    newCamera = self.cameraWithPosition(.back)!
+                })
+            }
+            do {
+                try self.captureSession?.addInput(AVCaptureDeviceInput(device: newCamera))
+            } catch {
+                print("error: \(error.localizedDescription)")
+            }
+        }
     }
     
     private func toggleTorch(on: Bool = false) {
@@ -222,7 +251,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             self.previewView.isHidden = false
             self.takePhotoButton.isHidden = false
         }))
-          
+        
         self.scrollView.isUserInteractionEnabled = false
         self.present(savingPhotoAlert, animated: true)
     }
@@ -231,7 +260,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.captureSession = AVCaptureSession()
         self.captureSession.sessionPreset = .photo
         
-        self.captureDevice = AVCaptureDevice.default(for: AVMediaType.video)
+        self.captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
         
         do {
             let input = try AVCaptureDeviceInput(device: captureDevice)
@@ -307,6 +336,19 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         UIGraphicsEndImageContext()
         
         return croppedImage
+    }
+    
+    
+    private func cameraWithPosition(_ position: AVCaptureDevice.Position) -> AVCaptureDevice? {
+        let deviceDescoverySession = AVCaptureDevice.DiscoverySession.init(deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera], mediaType: AVMediaType.video, position: AVCaptureDevice.Position.unspecified)
+        
+        for device in deviceDescoverySession.devices {
+            if device.position == position {
+                return device
+            }
+        }
+        
+        return nil
     }
     
 }
