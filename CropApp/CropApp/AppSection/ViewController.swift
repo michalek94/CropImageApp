@@ -88,7 +88,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
                         let viewTouchSize = CGSize(width: 72.0, height: 72.0)
                         let focusViewPoint = CGPoint(x: touchPoint.location(in: self.previewView).x - viewTouchSize.width/2, y: touchPoint.location(in: self.previewView).y - viewTouchSize.height/2)
                         let viewTouch = UIView(frame: CGRect(origin: focusViewPoint, size: CGSize(width: viewTouchSize.width, height: viewTouchSize.height)))
-                       
+                        
                         viewTouch.layer.cornerRadius = viewTouch.frame.height/2
                         viewTouch.layer.borderWidth = 2.0
                         viewTouch.layer.borderColor = UIColor.white.cgColor
@@ -148,7 +148,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.scrollView.isUserInteractionEnabled = true
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.takePhotoButton.isHidden = true
             self?.previewView.isHidden = true
         }
         
@@ -172,7 +171,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         self.scrollView.zoomScale = 1.0
         self.imageView.image = nil
         self.previewView.isHidden = false
-        self.takePhotoButton.isHidden = false
         self.scrollView.isUserInteractionEnabled = false
         
         self.view.layer.sublayers?.removeAll(where: { [weak self] layer -> Bool in
@@ -187,9 +185,11 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     @IBAction func switchCamera(_ sender: UIButton) {
         if let session = captureSession {
             let currentCameraInput: AVCaptureInput = session.inputs[0]
-            session.removeInput(currentCameraInput)
             var newCamera: AVCaptureDevice
             newCamera = AVCaptureDevice.default(for: AVMediaType.video)!
+            
+            session.beginConfiguration()
+            defer { session.commitConfiguration() }
             
             if (currentCameraInput as! AVCaptureDeviceInput).device.position == .back {
                 UIView.transition(with: self.previewView, duration: 0.5, options: .transitionFlipFromLeft, animations: { [weak self] in
@@ -202,11 +202,17 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
                     newCamera = self.cameraWithPosition(.back)!
                 })
             }
+            
+            session.removeInput(currentCameraInput)
+            
             do {
-                try self.captureSession?.addInput(AVCaptureDeviceInput(device: newCamera))
+                try session.addInput(AVCaptureDeviceInput(device: newCamera))
+                
             } catch {
                 print("error: \(error.localizedDescription)")
             }
+            
+            session.commitConfiguration()
         }
     }
     
@@ -237,19 +243,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         
         savingPhotoAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { action in
             UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-            // clean screen
             self.scrollView.zoomScale = 1.0
             self.imageView.image = nil
             self.previewView.isHidden = false
-            self.takePhotoButton.isHidden = false
         }))
         
         savingPhotoAlert.addAction(UIAlertAction(title: "No", style: .cancel, handler: { action in
-            // clean screen
             self.scrollView.zoomScale = 1.0
             self.imageView.image = nil
             self.previewView.isHidden = false
-            self.takePhotoButton.isHidden = false
         }))
         
         self.scrollView.isUserInteractionEnabled = false
@@ -371,7 +373,6 @@ extension ViewController: UIImagePickerControllerDelegate {
         self.dismiss(animated: true, completion: { [weak self] in
             self?.imageView.image = selectedImage
             self?.previewView.isHidden = true
-            self?.takePhotoButton.isHidden = true
             self?.scrollView.isUserInteractionEnabled = true
             
             let size: CGFloat = 200
